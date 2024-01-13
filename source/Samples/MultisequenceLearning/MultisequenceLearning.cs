@@ -28,55 +28,22 @@ namespace ApproveMultisequenceLearning
             int inputBits = 100;
             int numColumns = 1024;
 
-            HtmConfig cfg = new HtmConfig(new int[] { inputBits }, new int[] { numColumns })
-            {
-                Random = new ThreadSafeRandom(42),
+            HtmConfig cfg = GetHtmConfig(inputBits, numColumns);
 
-                CellsPerColumn = 25,
-                GlobalInhibition = true,
-                LocalAreaDensity = -1,
-                NumActiveColumnsPerInhArea = 0.02 * numColumns,
-                PotentialRadius = (int)(0.15 * inputBits),
-                //InhibitionRadius = 15,
-
-                MaxBoost = 10.0,
-                DutyCyclePeriod = 25,
-                MinPctOverlapDutyCycles = 0.75,
-                MaxSynapsesPerSegment = (int)(0.02 * numColumns),
-
-                ActivationThreshold = 15,
-                ConnectedPermanence = 0.5,
-
-                // Learning is slower than forgetting in this case.
-                PermanenceDecrement = 0.25,
-                PermanenceIncrement = 0.15,
-
-                // Used by punishing of segments.
-                PredictedSegmentDecrement = 0.1
-            };
-
-            double max = 20;
-
-            Dictionary<string, object> settings = new Dictionary<string, object>()
-            {
-                { "W", 15},
-                { "N", inputBits},
-                { "Radius", -1.0},
-                { "MinVal", 0.0},
-                { "Periodic", false},
-                { "Name", "scalar"},
-                { "ClipInput", false},
-                { "MaxVal", max}
-            };
-
-            EncoderBase encoder = new ScalarEncoder(settings);
+            EncoderBase encoder = GetEncoder(inputBits);
 
             return RunExperiment(inputBits, cfg, encoder, sequences);
         }
 
         /// <summary>
-        ///
+        /// 
         /// </summary>
+        /// <param name="inputBits"></param>
+        /// <param name="cfg"></param>
+        /// <param name="encoder"></param>
+        /// <param name="sequences"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, Dictionary<string, List<double>> sequences)
         {
             Stopwatch sw = new Stopwatch();
@@ -308,6 +275,69 @@ namespace ApproveMultisequenceLearning
             return new Predictor(layer1, mem, cls);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inputBits"></param>
+        /// <returns></returns>
+        private ScalarEncoder GetEncoder(int inputBits)
+        {
+            double max = 20;
+
+            Dictionary<string, object> settings = new Dictionary<string, object>()
+            {
+                { "W", 15},
+                { "N", inputBits},
+                { "Radius", -1.0},
+                { "MinVal", 0.0},
+                { "Periodic", false},
+                { "Name", "scalar"},
+                { "ClipInput", false},
+                { "MaxVal", max}
+            };
+
+            ScalarEncoder encoder = new ScalarEncoder(settings);
+
+            return encoder;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inputBits"></param>
+        /// <param name="numColumns"></param>
+        /// <returns></returns>
+        private HtmConfig GetHtmConfig(int inputBits, int numColumns)
+        {
+            HtmConfig cfg = new HtmConfig(new int[] { inputBits }, new int[] { numColumns })
+            {
+                Random = new ThreadSafeRandom(42),
+
+                CellsPerColumn = 25,
+                GlobalInhibition = true,
+                LocalAreaDensity = -1,
+                NumActiveColumnsPerInhArea = 0.02 * numColumns,
+                PotentialRadius = (int)(0.15 * inputBits),
+                //InhibitionRadius = 15,
+
+                MaxBoost = 10.0,
+                DutyCyclePeriod = 25,
+                MinPctOverlapDutyCycles = 0.75,
+                MaxSynapsesPerSegment = (int)(0.02 * numColumns),
+
+                ActivationThreshold = 15,
+                ConnectedPermanence = 0.5,
+
+                // Learning is slower than forgetting in this case.
+                PermanenceDecrement = 0.25,
+                PermanenceIncrement = 0.15,
+
+                // Used by punishing of segments.
+                PredictedSegmentDecrement = 0.1
+            };
+
+            return cfg;
+        }
       
         /// <summary>
         /// Gets the number of all unique inputs.

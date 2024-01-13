@@ -18,24 +18,9 @@ namespace ApproveMultisequenceLearning
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            
-            RunMultiSimpleSequenceLearningExperiment();
-            // RunMultiSequenceLearningExperiment();
+            //running the main experiment
+            RunMultiSequenceLearningExperiment();
         }
-
-        private static void RunMultiSimpleSequenceLearningExperiment()
-        {
-            Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>>();
-
-            sequences.Add("S1", new List<double>(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, }));
-            sequences.Add("S2", new List<double>(new double[] { 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0 }));
-
-            //
-            // Prototype for building the prediction engine.
-            MultiSequenceLearning experiment = new MultiSequenceLearning();
-            var predictor = experiment.Run(sequences);
-        }
-
 
         /// <summary>
         /// This example demonstrates how to learn two sequences and how to use the prediction mechanism.
@@ -45,26 +30,30 @@ namespace ApproveMultisequenceLearning
         /// </summary>
         private static void RunMultiSequenceLearningExperiment()
         {
+            //input sequences
             Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>>();
 
-            //sequences.Add("S1", new List<double>(new double[] { 0.0, 1.0, 0.0, 2.0, 3.0, 4.0, 5.0, 6.0, 5.0, 4.0, 3.0, 7.0, 1.0, 9.0, 12.0, 11.0, 12.0, 13.0, 14.0, 11.0, 12.0, 14.0, 5.0, 7.0, 6.0, 9.0, 3.0, 4.0, 3.0, 4.0, 3.0, 4.0 }));
-            //sequences.Add("S2", new List<double>(new double[] { 0.8, 2.0, 0.0, 3.0, 3.0, 4.0, 5.0, 6.0, 5.0, 7.0, 2.0, 7.0, 1.0, 9.0, 11.0, 11.0, 10.0, 13.0, 14.0, 11.0, 7.0, 6.0, 5.0, 7.0, 6.0, 5.0, 3.0, 2.0, 3.0, 4.0, 3.0, 4.0 }));
+            sequences.Add("S1", new List<double>(new double[] { 0.0, 1.0, 2.0, 4.0, 6.0, 5.0, 7.0, 9,0}));
+            sequences.Add("S2", new List<double>(new double[] { 8.0, 10.0, 12.0, 19.0, 20.0, 0.0, 1.0, 2.0 }));
+            sequences.Add("S3", new List<double>(new double[] { 5.0, 7.0, 8.0, 10.0, 12.0, 13.0, 14.0, 15.0 }));
+            sequences.Add("S4", new List<double>(new double[] { 15.0, 17.0, 18.0, 1.0, 2.0, 4.0, 6.0, 5.0 }));
+            sequences.Add("S5", new List<double>(new double[] { 8.0, 10.0, 12.0, 19.0, 20.0, 0.0, 2.0, 4.0 }));
 
-            sequences.Add("S1", new List<double>(new double[] { 0.0, 1.0, 2.0, 3.0, 4.0, 2.0, 5.0, }));
-            sequences.Add("S2", new List<double>(new double[] { 8.0, 1.0, 2.0, 9.0, 10.0, 7.0, 11.00 }));
-
-            //
             // Prototype for building the prediction engine.
             MultiSequenceLearning experiment = new MultiSequenceLearning();
+
+            //call the experiment and create the learned model in predictor
             var predictor = experiment.Run(sequences);
 
             //
             // These list are used to see how the prediction works.
             // Predictor is traversing the list element by element. 
             // By providing more elements to the prediction, the predictor delivers more precise result.
-            var list1 = new double[] { 1.0, 2.0, 3.0, 4.0, 2.0, 5.0 };
-            var list2 = new double[] { 2.0, 3.0, 4.0 };
-            var list3 = new double[] { 8.0, 1.0, 2.0 };
+            // Consider this as test sequence and we predict the next element 
+            var list1 = new double[] { 1.0, 2.0, 4.0, 6.0 };
+            var list2 = new double[] { 20.0, 0.0, 1.0 };
+            var list3 = new double[] { 19.0, 20.0, 0.0 };
+            var list4 = new double[] { 10.0, 12.0, 13.0 };
 
             predictor.Reset();
             PredictNextElement(predictor, list1);
@@ -74,6 +63,9 @@ namespace ApproveMultisequenceLearning
 
             predictor.Reset();
             PredictNextElement(predictor, list3);
+
+            predictor.Reset();
+            PredictNextElement(predictor, list4);
         }
 
         private static void PredictNextElement(Predictor predictor, double[] list)
