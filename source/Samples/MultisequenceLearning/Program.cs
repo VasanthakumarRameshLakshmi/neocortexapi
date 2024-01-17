@@ -1,10 +1,12 @@
-﻿using NeoCortexApi;
+﻿using MultisequenceLearning;
+using NeoCortexApi;
 using NeoCortexApi.Encoders;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using static ApproveMultisequenceLearning.MultiSequenceLearning;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ApproveMultisequenceLearning
 {
@@ -18,8 +20,11 @@ namespace ApproveMultisequenceLearning
         /// <param name="args"></param>
         static void Main(string[] args)
         {
+            //creating dataset for experiment
+            var data = CreateData();
+
             //running the main experiment
-            RunMultiSequenceLearningExperiment();
+            //RunMultiSequenceLearningExperiment();
         }
 
         /// <summary>
@@ -28,7 +33,7 @@ namespace ApproveMultisequenceLearning
         /// Second, three short sequences with three elements each are created und used for prediction. The predictor used by experiment privides to the HTM every element of every predicting sequence.
         /// The predictor tries to predict the next element.
         /// </summary>
-        private static void RunMultiSequenceLearningExperiment()
+        private static void RunMultiSequenceLearningExperiment(string dataset)
         {
             //input sequences
             Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>>();
@@ -68,6 +73,43 @@ namespace ApproveMultisequenceLearning
             PredictNextElement(predictor, list4);
         }
 
+        private static List<string> CreateData()
+        {
+            var datasetPath = new List<string>();
+            int numberOfSequence = 10;
+            int size = 20;
+            int startVal = 4;
+            int endVal = 30;
+
+            ConfigOfSequence configOfSequence = new ConfigOfSequence(numberOfSequence, size, startVal, endVal);
+
+            var dataset = CreateDataset(configOfSequence);
+            datasetPath.Add(dataset);
+
+            var testDataset = CreateTestDataset(configOfSequence, MulitsequenceHelper.ReadDataset(dataset));
+            datasetPath.Add(testDataset);
+            return datasetPath;
+        }
+
+        private static string CreateDataset(ConfigOfSequence config)
+        {
+            var dataset = DatasetHelper.CreateDataset(config.count, config.size, config.startVal, config.endVal);
+
+            var datasetPath = MulitsequenceHelper.SaveDataset(dataset);
+
+            return datasetPath;
+        }
+
+        private static string CreateTestDataset(ConfigOfSequence config, List<Sequence> sequences)
+        {
+
+            var testdataset = TestDatasetHelper.CreateTestDataset(config.count, config.size, config.startVal, config.endVal, sequences);
+
+            var testDatasetPath = MulitsequenceHelper.SaveDataset(testdataset);
+
+            return testDatasetPath;
+        }
+
         private static void PredictNextElement(Predictor predictor, double[] list)
         {
             Debug.WriteLine("------------------------------");
@@ -90,6 +132,15 @@ namespace ApproveMultisequenceLearning
                 else
                     Debug.WriteLine("Nothing predicted :(");
             }
+
+            /*
+             * Calculate the ACCURACY here!!!!!!
+             * 
+             * Accuracy is calculated as number of matching predictions made 
+             * divided by total number of prediction made for an element in subsequence
+             * 
+             * accuracy = number of matching predictions/total number of prediction * 100
+             */
 
             Debug.WriteLine("------------------------------");
         }
