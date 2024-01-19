@@ -9,6 +9,14 @@ namespace ApproveMultisequenceLearning
 {
     public class DatasetHelper
     {
+        /// <summary>
+        /// Checks if the parameters for creating dataset is valid or not
+        /// </summary>
+        /// <param name="numberOfSequence">number of sequence which needs to be created</param>
+        /// <param name="size">size of sequence</param>
+        /// <param name="startVal">start value of sequence</param>
+        /// <param name="endVal">end value of sequence</param>
+        /// <returns>return true if parameters are valid</returns>
         public static bool IsCreateDatasetValid(int numberOfSequence, int size, int startVal, int endVal)
         {
             try
