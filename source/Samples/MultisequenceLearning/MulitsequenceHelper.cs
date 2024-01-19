@@ -97,7 +97,26 @@ namespace ApproveMultisequenceLearning
         /// <returns>Full path of the dataset</returns>
         public static string SaveDataset(List<Sequence> sequences)
         {
-            throw new NotImplementedException();
+            if (sequences == null)
+                return null;
+
+            string BasePath = AppDomain.CurrentDomain.BaseDirectory;
+            string datasetFolder = Path.Combine(BasePath, "dataset");
+            if (!Directory.Exists(datasetFolder))
+                Directory.CreateDirectory(datasetFolder);
+            string datasetPath = Path.Combine(datasetFolder, $"dataset_{DateTime.Now.Ticks}.json");
+
+            Console.WriteLine("Saving dataset...");
+
+            if (!File.Exists(datasetPath))
+            {
+                using (StreamWriter sw = File.CreateText(datasetPath))
+                {
+                    sw.WriteLine(JsonConvert.SerializeObject(sequences));
+                }
+            }
+
+            return datasetPath;
         }
     }
 }
