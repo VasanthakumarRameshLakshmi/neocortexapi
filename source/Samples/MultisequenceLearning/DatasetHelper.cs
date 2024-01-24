@@ -9,7 +9,7 @@ namespace ApproveMultisequenceLearning
 {
     public class DatasetHelper
     {
-        public static bool IsCreateDatasetValid(int numberOfSequence, int size, int startVal, int endVal)
+        private static bool IsCreateDatasetValid(int numberOfSequence, int size, int startVal, int endVal)
         {
             try
             {
@@ -20,9 +20,9 @@ namespace ApproveMultisequenceLearning
                 if (size <= 9)
                     throw new ArgumentException("Size of each sequence must be atleast 8");
 
-                //the set of number in sequence must be a whole number i.e all positive numbers
+                //the set of number in sequence must be a natural number i.e all positive numbers
                 if (startVal < 0)
-                    throw new ArgumentException("");
+                    throw new ArgumentException("startVal must be postive to create positive sequences");
 
                 //endValue of sequence must be greater than startValue to have a sequence
                 if (endVal < startVal)

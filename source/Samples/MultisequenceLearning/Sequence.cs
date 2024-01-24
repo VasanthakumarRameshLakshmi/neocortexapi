@@ -16,13 +16,15 @@ namespace ApproveMultisequenceLearning
     {
         public int count { get; set; }
         public int size { get; set; }
+        public int testSize { get; set; }
         public int startVal { get; set; }
         public int endVal { get; set; }
 
-        public ConfigOfSequence(int Count, int Size, int StartVal, int EndVal)
+        public ConfigOfSequence(int Count, int Size, int TestSize, int StartVal, int EndVal)
         {
             this.count = Count;
             this.size = Size + 3;
+            this.testSize = TestSize;
             this.startVal = StartVal;
             this.endVal = EndVal;
         }

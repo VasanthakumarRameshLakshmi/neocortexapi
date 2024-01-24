@@ -21,7 +21,7 @@ namespace ApproveMultisequenceLearning
         static void Main(string[] args)
         {
             //creating dataset for experiment
-            var data = CreateData();
+            var data = CreateSaveData();
 
             //running the main experiment
             //RunMultiSequenceLearningExperiment();
@@ -73,20 +73,24 @@ namespace ApproveMultisequenceLearning
             PredictNextElement(predictor, list4);
         }
 
-        private static List<string> CreateData()
+        private static List<string> CreateSaveData()
         {
             var datasetPath = new List<string>();
             int numberOfSequence = 10;
+            int numberOfTestSequence = 10;
             int size = 20;
+            int testSize = 4;
             int startVal = 4;
             int endVal = 30;
 
-            ConfigOfSequence configOfSequence = new ConfigOfSequence(numberOfSequence, size, startVal, endVal);
+            ConfigOfSequence configOfSequence = new ConfigOfSequence(numberOfSequence, size, 0, startVal, endVal);
 
             var dataset = CreateDataset(configOfSequence);
             datasetPath.Add(dataset);
 
-            var testDataset = CreateTestDataset(configOfSequence, MulitsequenceHelper.ReadDataset(dataset));
+            ConfigOfSequence configOfTestSequence = new ConfigOfSequence(numberOfTestSequence, size, testSize, startVal, endVal);
+
+            var testDataset = CreateTestDataset(configOfTestSequence, MulitsequenceHelper.ReadDataset(dataset));
             datasetPath.Add(testDataset);
             return datasetPath;
         }
@@ -103,7 +107,7 @@ namespace ApproveMultisequenceLearning
         private static string CreateTestDataset(ConfigOfSequence config, List<Sequence> sequences)
         {
 
-            var testdataset = TestDatasetHelper.CreateTestDataset(config.count, config.size, config.startVal, config.endVal, sequences);
+            var testdataset = TestDatasetHelper.CreateTestDataset(config.count, config.size - 3, config.testSize, config.startVal, config.endVal, sequences);
 
             var testDatasetPath = MulitsequenceHelper.SaveDataset(testdataset);
 
