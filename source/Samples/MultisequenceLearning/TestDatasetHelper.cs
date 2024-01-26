@@ -10,7 +10,16 @@ namespace MultisequenceLearning
 {
     public class TestDatasetHelper
     {
-        
+        /// <summary>
+        /// Generates a customizable test dataset for sequence-based evaluation
+        /// </summary>
+        /// <param name="numberOfSequence">number of sequence which needs to be created</param>
+        /// <param name="size">size of sequence</param>
+        /// <param name="testSize">size of test sequence</param>
+        /// <param name="startVal">start value of sequence</param>
+        /// <param name="endVal">end value of sequence</param>
+        /// <param name="sequences">Name of the sequence</param>
+        /// <returns>return the test sequences generated</returns>
         public static List<Sequence> CreateTestDataset(int numberOfSequence, int size, int testSize, int startVal, int endVal, List<Sequence> sequences)
         {
             if (!IsCreateTestDatasetValid(numberOfSequence, size, testSize, startVal, endVal))
@@ -27,7 +36,11 @@ namespace MultisequenceLearning
 
             return testSequences;
         }
-
+        /// <summary>
+        /// Generates a customizable test dataset for sequence-based evaluation
+        /// </summary>
+        /// <param name="sequences">sequences which needs to be selected</param>
+        /// <returns>return the selected sequence</returns>
         private static Sequence SelectRandomSequence(List<Sequence> sequences)
         {
             Random random = new Random(Guid.NewGuid().GetHashCode());
@@ -37,7 +50,14 @@ namespace MultisequenceLearning
             
             return selectSequence;
         }
-
+        /// <summary>
+        /// Creates a new subsequence from the test sequence
+        /// </summary>
+        /// <param name="testSize">size of test sequence</param>
+        /// <param name="size">size of sequence</param>
+        /// <param name="sequence">original sequence from which the subsequence is created</param>
+        /// <param name="sequenceName">Name of the new subsequence</param>
+        /// <returns>return new Subsequence created</returns>
         private static Sequence CreateTestSequence(int testSize, int size, Sequence sequence, string sequenceName)
         {
             Sequence newSubSequence = new Sequence();
@@ -54,7 +74,15 @@ namespace MultisequenceLearning
 
             return newSubSequence;
         }
-
+        /// <summary>
+        /// Checks if the parameters for creating dataset is valid or not
+        /// </summary>
+        /// <param name="numberOfSequence">Number of sequences which needs to be generated</param>
+        /// <param name="size">size of sequence</param>
+        /// <param name="testSize">size of test sequence</param>
+        /// <param name="startVal">>start value of sequence</param>
+        /// <param name="endVal">end value of sequence</param>
+        /// <returns>return true if parameters are valid</returns>
         private static bool IsCreateTestDatasetValid(int numberOfSequence, int size, int testSize, int startVal, int endVal)
         {
             try
