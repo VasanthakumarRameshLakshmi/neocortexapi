@@ -72,7 +72,7 @@ namespace ApproveMultisequenceLearning
             predictor.Reset();
             PredictNextElement(predictor, list4);
         }
-
+     
         private static List<string> CreateSaveData()
         {
             var datasetPath = new List<string>();
@@ -82,7 +82,7 @@ namespace ApproveMultisequenceLearning
             int testSize = 4;
             int startVal = 4;
             int endVal = 30;
-
+            
             ConfigOfSequence configOfSequence = new ConfigOfSequence(numberOfSequence, size, 0, startVal, endVal);
 
             var dataset = CreateDataset(configOfSequence);
@@ -94,7 +94,11 @@ namespace ApproveMultisequenceLearning
             datasetPath.Add(testDataset);
             return datasetPath;
         }
-
+        /// <summary>
+        /// Generates a dataset based on the provided configuration
+        /// </summary>
+        /// <param name="config">Configuration for dataset generation</param>
+        /// <returns>return the path to the stored dataset</returns>
         private static string CreateDataset(ConfigOfSequence config)
         {
             var dataset = DatasetHelper.CreateDataset(config.count, config.size, config.startVal, config.endVal);
@@ -103,7 +107,12 @@ namespace ApproveMultisequenceLearning
 
             return datasetPath;
         }
-
+        /// <summary>
+        /// Creates a test dataset based on the provided configuration and existing sequences
+        /// </summary>
+        /// <param name="config">Configuration for test dataset generation</param>
+        /// <param name="sequences">List of existing sequences to be included in the test dataset</param>
+        /// <returns>return the path to the stored test dataset</returns>
         private static string CreateTestDataset(ConfigOfSequence config, List<Sequence> sequences)
         {
 
@@ -113,7 +122,11 @@ namespace ApproveMultisequenceLearning
 
             return testDatasetPath;
         }
-
+        /// <summary>
+        /// Predicts the next element in the sequence using the provided predictor and input list
+        /// </summary>
+        /// <param name="predictor">predictor used for making predictions</param>
+        /// <param name="list">input list for prediction</param>
         private static void PredictNextElement(Predictor predictor, double[] list)
         {
             Debug.WriteLine("------------------------------");
