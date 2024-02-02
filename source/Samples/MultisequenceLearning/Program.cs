@@ -1,10 +1,12 @@
 ﻿using MultisequenceLearning;
 using NeoCortexApi;
 using NeoCortexApi.Encoders;
+using Org.BouncyCastle.Crypto;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using static ApproveMultisequenceLearning.MultiSequenceLearning;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -12,6 +14,8 @@ namespace ApproveMultisequenceLearning
 {
     class Program
     {
+        public static int max;
+
         /// <summary>
         /// This sample shows a typical experiment code for SP and TM.
         /// You must start this code in debugger to follow the trace.
@@ -23,8 +27,12 @@ namespace ApproveMultisequenceLearning
             //creating dataset for experiment
             var data = CreateSaveData();
 
+            //read dataset in sequence
+            var dataset = ReadDataset(data.First());
+            var testDataset = ReadDataset(data.Last());
+
             //running the main experiment
-            //RunMultiSequenceLearningExperiment();
+            RunMultiSequenceLearningExperiment(dataset, testDataset);
         }
 
         /// <summary>
@@ -33,44 +41,22 @@ namespace ApproveMultisequenceLearning
         /// Second, three short sequences with three elements each are created und used for prediction. The predictor used by experiment privides to the HTM every element of every predicting sequence.
         /// The predictor tries to predict the next element.
         /// </summary>
-        private static void RunMultiSequenceLearningExperiment(string dataset)
+        private static void RunMultiSequenceLearningExperiment(List<Sequence> dataset, List<Sequence> testDataset)
         {
-            //input sequences
-            Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>>();
-
-            sequences.Add("S1", new List<double>(new double[] { 0.0, 1.0, 2.0, 4.0, 6.0, 5.0, 7.0, 9,0}));
-            sequences.Add("S2", new List<double>(new double[] { 8.0, 10.0, 12.0, 19.0, 20.0, 0.0, 1.0, 2.0 }));
-            sequences.Add("S3", new List<double>(new double[] { 5.0, 7.0, 8.0, 10.0, 12.0, 13.0, 14.0, 15.0 }));
-            sequences.Add("S4", new List<double>(new double[] { 15.0, 17.0, 18.0, 1.0, 2.0, 4.0, 6.0, 5.0 }));
-            sequences.Add("S5", new List<double>(new double[] { 8.0, 10.0, 12.0, 19.0, 20.0, 0.0, 2.0, 4.0 }));
-
             // Prototype for building the prediction engine.
             MultiSequenceLearning experiment = new MultiSequenceLearning();
 
             //call the experiment and create the learned model in predictor
-            var predictor = experiment.Run(sequences);
+            var predictor = experiment.Run(dataset, max);
 
-            //
-            // These list are used to see how the prediction works.
-            // Predictor is traversing the list element by element. 
-            // By providing more elements to the prediction, the predictor delivers more precise result.
-            // Consider this as test sequence and we predict the next element 
-            var list1 = new double[] { 1.0, 2.0, 4.0, 6.0 };
-            var list2 = new double[] { 20.0, 0.0, 1.0 };
-            var list3 = new double[] { 19.0, 20.0, 0.0 };
-            var list4 = new double[] { 10.0, 12.0, 13.0 };
-
-            predictor.Reset();
-            PredictNextElement(predictor, list1);
-
-            predictor.Reset();
-            PredictNextElement(predictor, list2);
-
-            predictor.Reset();
-            PredictNextElement(predictor, list3);
-
-            predictor.Reset();
-            PredictNextElement(predictor, list4);
+            foreach (Sequence item in testDataset)
+            {
+                Console.WriteLine("------------------------------");
+                Console.WriteLine($"Using test sequence: {item.name}");
+                predictor.Reset();
+                var accuracy = PredictNextElement(predictor, item.data);
+                Console.WriteLine($"Accuracy for {item.name} sequence: {accuracy}%");
+            }
         }
      
         private static List<string> CreateSaveData()
@@ -82,7 +68,9 @@ namespace ApproveMultisequenceLearning
             int testSize = 4;
             int startVal = 4;
             int endVal = 30;
-            
+
+            max = endVal;
+
             ConfigOfSequence configOfSequence = new ConfigOfSequence(numberOfSequence, size, 0, startVal, endVal);
 
             var dataset = CreateDataset(configOfSequence);
@@ -127,27 +115,50 @@ namespace ApproveMultisequenceLearning
         /// </summary>
         /// <param name="predictor">predictor used for making predictions</param>
         /// <param name="list">input list for prediction</param>
-        private static void PredictNextElement(Predictor predictor, double[] list)
+        private static double PredictNextElement(Predictor predictor, int[] list)
         {
+            int matchCount = 0;
+            int predictions = 0;
+            double accuracy = 0.0;
+            int prev = -1;
+            bool first = true;
+
             Debug.WriteLine("------------------------------");
 
             foreach (var item in list)
             {
-                var res = predictor.Predict(item);
-
-                if (res.Count > 0)
+                if(first)
                 {
-                    foreach (var pred in res)
-                    {
-                        Debug.WriteLine($"{pred.PredictedInput} - {pred.Similarity}");
-                    }
-
-                    var tokens = res.First().PredictedInput.Split('_');
-                    var tokens2 = res.First().PredictedInput.Split('-');
-                    Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens2.Last()}");
+                    first = false;
                 }
-                else
-                    Debug.WriteLine("Nothing predicted :(");
+                else 
+                {
+                    Console.WriteLine($"Input: {prev}");
+                    var res = predictor.Predict(prev);
+
+                    if (res.Count > 0)
+                    {
+                        foreach (var pred in res)
+                        {
+                            Debug.WriteLine($"{pred.PredictedInput} - {pred.Similarity}");
+                        }
+
+                        var tokens = res.First().PredictedInput.Split('_');
+                        var tokens2 = res.First().PredictedInput.Split('-');
+                        Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens2.Last()}");
+
+                        if (item == Int32.Parse(tokens2.Last()))
+                        {
+                            matchCount++;
+                        }
+
+                        predictions++;
+                    }
+                    else
+                        Debug.WriteLine("Nothing predicted :(");
+                }
+
+                prev = item;
             }
 
             /*
@@ -158,8 +169,17 @@ namespace ApproveMultisequenceLearning
              * 
              * accuracy = number of matching predictions/total number of prediction * 100
              */
-
+            accuracy = (double)matchCount / predictions * 100;
             Debug.WriteLine("------------------------------");
+
+            return accuracy;
+        }
+
+        private static List<Sequence> ReadDataset(string datasetPath)
+        {
+            List<Sequence> dataset = MulitsequenceHelper.ReadDataset(datasetPath);
+
+            return dataset;
         }
     }
 }

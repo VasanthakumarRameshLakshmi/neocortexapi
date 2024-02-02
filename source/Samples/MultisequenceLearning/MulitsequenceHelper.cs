@@ -16,11 +16,10 @@ namespace ApproveMultisequenceLearning
         /// Get the encoder with settings
         /// </summary>
         /// <param name="inputBits">input bits</param>
+        /// <param name="max">max value of input</param>
         /// <returns>Object of EncoderBase</returns>
-        public static ScalarEncoder GetEncoder(int inputBits)
+        public static ScalarEncoder GetEncoder(int inputBits, int max)
         {
-            double max = 20;
-
             Dictionary<string, object> settings = new Dictionary<string, object>()
             {
                 { "W", 15},
@@ -30,7 +29,7 @@ namespace ApproveMultisequenceLearning
                 { "Periodic", false},
                 { "Name", "scalar"},
                 { "ClipInput", false},
-                { "MaxVal", max}
+                { "MaxVal", (double)max}
             };
 
             ScalarEncoder encoder = new ScalarEncoder(settings);

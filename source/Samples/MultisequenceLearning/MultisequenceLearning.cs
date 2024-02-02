@@ -21,7 +21,8 @@ namespace ApproveMultisequenceLearning
         /// Runs the learning of sequences.
         /// </summary>
         /// <param name="sequences">Dictionary of sequences. KEY is the sewuence name, the VALUE is th elist of element of the sequence.</param>
-        public Predictor Run(Dictionary<string, List<double>> sequences)
+        /// <param name="max">max value of input</param>
+        public Predictor Run(List<Sequence> sequences, int max)
         {
             Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
 
@@ -30,7 +31,7 @@ namespace ApproveMultisequenceLearning
 
             HtmConfig cfg = MulitsequenceHelper.GetHtmConfig(inputBits, numColumns);
 
-            EncoderBase encoder = MulitsequenceHelper.GetEncoder(inputBits);
+            EncoderBase encoder = MulitsequenceHelper.GetEncoder(inputBits, max);
 
             return RunExperiment(inputBits, cfg, encoder, sequences);
         }
@@ -44,7 +45,7 @@ namespace ApproveMultisequenceLearning
         /// <param name="sequences"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, Dictionary<string, List<double>> sequences)
+        private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, List<Sequence> sequences)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -101,7 +102,7 @@ namespace ApproveMultisequenceLearning
 
             var lastPredictedValues = new List<string>(new string[] { "0"});
             
-            int maxCycles = 3500;
+            int maxCycles = 500;
 
             //
             // Training SP to get stable. New-born stage.
@@ -113,13 +114,14 @@ namespace ApproveMultisequenceLearning
 
                 cycle++;
 
-                Debug.WriteLine($"-------------- Newborn Cycle {cycle} ---------------");
+                Debug.WriteLine($"-------------- Newborn SP Cycle {cycle} ---------------");
+                Console.WriteLine($"-------------- Newborn SP Cycle {cycle} ---------------");
 
                 foreach (var inputs in sequences)
                 {
-                    foreach (var input in inputs.Value)
+                    foreach (var input in inputs.data)
                     {
-                        Debug.WriteLine($" -- {inputs.Key} - {input} --");
+                        Debug.WriteLine($" -- {inputs.name} - {input} --");
                     
                         var lyrOut = layer1.Compute(input, true);
 
@@ -142,9 +144,10 @@ namespace ApproveMultisequenceLearning
             // Loop over all sequences.
             foreach (var sequenceKeyPair in sequences)
             {
-                Debug.WriteLine($"-------------- Sequences {sequenceKeyPair.Key} ---------------");
+                Debug.WriteLine($"-------------- Sequences {sequenceKeyPair.name} ---------------");
+                Console.WriteLine($"-------------- Sequences {sequenceKeyPair.name} ---------------");
 
-                int maxPrevInputs = sequenceKeyPair.Value.Count - 1;
+                int maxPrevInputs = sequenceKeyPair.data.Length - 1;
 
                 List<string> previousInputs = new List<string>();
 
@@ -163,10 +166,11 @@ namespace ApproveMultisequenceLearning
 
                     Debug.WriteLine("");
 
-                    Debug.WriteLine($"-------------- Cycle {cycle} ---------------");
+                    Debug.WriteLine($"-------------- Cycle SP+TM {cycle} ---------------");
+                    Console.WriteLine($"-------------- Cycle SP+TM {cycle} ---------------");
                     Debug.WriteLine("");
 
-                    foreach (var input in sequenceKeyPair.Value)
+                    foreach (var input in sequenceKeyPair.data)
                     {
                         Debug.WriteLine($"-------------- {input} ---------------");
 
@@ -186,7 +190,7 @@ namespace ApproveMultisequenceLearning
                         if (previousInputs.Count < maxPrevInputs)
                             continue;
 
-                        string key = GetKey(previousInputs, input, sequenceKeyPair.Key);
+                        string key = GetKey(previousInputs, input, sequenceKeyPair.name);
 
                         List<Cell> actCells;
 
@@ -235,23 +239,26 @@ namespace ApproveMultisequenceLearning
                     }
 
                     // The first element (a single element) in the sequence cannot be predicted
-                    double maxPossibleAccuraccy = (double)((double)sequenceKeyPair.Value.Count - 1) / (double)sequenceKeyPair.Value.Count * 100.0;
+                    double maxPossibleAccuraccy = (double)((double)sequenceKeyPair.data.Length - 1) / (double)sequenceKeyPair.data.Length * 100.0;
 
-                    double accuracy = (double)matches / (double)sequenceKeyPair.Value.Count * 100.0;
+                    double accuracy = (double)matches / (double)sequenceKeyPair.data.Length * 100.0;
 
-                    Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {sequenceKeyPair.Value.Count}\t {accuracy}%");
+                    Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {sequenceKeyPair.data.Length}\t {accuracy}%");
+                    Console.WriteLine($"Cycle: {cycle}\tMatches={matches} of {sequenceKeyPair.data.Length}\t {accuracy}%");
 
                     if (accuracy >= maxPossibleAccuraccy)
                     {
                         maxMatchCnt++;
                         Debug.WriteLine($"100% accuracy reched {maxMatchCnt} times.");
+                        Console.WriteLine($"100% accuracy reched {maxMatchCnt} times.");
 
                         //
                         // Experiment is completed if we are 30 cycles long at the 100% accuracy.
                         if (maxMatchCnt >= 30)
                         {
                             sw.Stop();
-                            Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequenceKeyPair.Key} learning time: {sw.Elapsed}.");
+                            Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequenceKeyPair.name} learning time: {sw.Elapsed}.");
+                            Console.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequenceKeyPair.name} learning time: {sw.Elapsed}.");
                             isLearningCompleted = true;
                             break;
                         }
@@ -259,6 +266,7 @@ namespace ApproveMultisequenceLearning
                     else if (maxMatchCnt > 0)
                     {
                         Debug.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
+                        Console.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
                         maxMatchCnt = 0;
                     }
 
@@ -282,14 +290,14 @@ namespace ApproveMultisequenceLearning
         /// </summary>
         /// <param name="sequences">Alle sequences.</param>
         /// <returns></returns>
-        private int GetNumberOfInputs(Dictionary<string, List<double>> sequences)
+        private int GetNumberOfInputs(List<Sequence> sequences)
         {
             int num = 0;
 
             foreach (var inputs in sequences)
             {
                 //num += inputs.Value.Distinct().Count();
-                num += inputs.Value.Count;
+                num += inputs.data.Length;
             }
 
             return num;
