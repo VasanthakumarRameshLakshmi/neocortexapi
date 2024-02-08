@@ -49,25 +49,33 @@ namespace ApproveMultisequenceLearning
             //call the experiment and create the learned model in predictor
             var predictor = experiment.Run(dataset, max);
 
+            var logFile = experiment.OutputPath;
+            var logs = new List<string>();
+
             foreach (Sequence item in testDataset)
             {
                 Console.WriteLine("------------------------------");
+                logs.Add("------------------------------");
                 Console.WriteLine($"Using test sequence: {item.name}");
+                logs.Add($"Using test sequence: {item.name}");
                 predictor.Reset();
                 var accuracy = PredictNextElement(predictor, item.data);
                 Console.WriteLine($"Accuracy for {item.name} sequence: {accuracy}%");
+                logs.Add($"Accuracy for {item.name} sequence: {accuracy}%");
             }
+
+            MulitsequenceHelper.WriteLogs(logFile, logs);
         }
      
         private static List<string> CreateSaveData()
         {
             var datasetPath = new List<string>();
-            int numberOfSequence = 10;
+            int numberOfSequence = 50;
             int numberOfTestSequence = 10;
-            int size = 20;
-            int testSize = 4;
+            int size = 25;
+            int testSize = 5;
             int startVal = 4;
-            int endVal = 30;
+            int endVal = 35;
 
             max = endVal;
 

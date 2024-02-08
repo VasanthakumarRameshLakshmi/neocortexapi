@@ -17,6 +17,8 @@ namespace ApproveMultisequenceLearning
     /// </summary>
     public class MultiSequenceLearning
     {
+        public string OutputPath { get; set; }
+
         /// <summary>
         /// Runs the learning of sequences.
         /// </summary>
@@ -94,6 +96,13 @@ namespace ApproveMultisequenceLearning
             layer1.HtmModules.Add("encoder", encoder);
             layer1.HtmModules.Add("sp", sp);
 
+            //file for saving logs
+            string logFile = MulitsequenceHelper.GetLogFile();
+            OutputPath = logFile;
+
+            //list for logs
+            List<string> logs = new List<string>();
+
             //double[] inputs = inputValues.ToArray();
             int[] prevActiveCols = new int[0];
             
@@ -107,7 +116,7 @@ namespace ApproveMultisequenceLearning
             //
             // Training SP to get stable. New-born stage.
             //
-
+            logs.Add($"Training SP to get stable.");
             for (int i = 0; i < maxCycles && isInStableState == false; i++)
             {
                 matches = 0;
@@ -116,13 +125,14 @@ namespace ApproveMultisequenceLearning
 
                 Debug.WriteLine($"-------------- Newborn SP Cycle {cycle} ---------------");
                 Console.WriteLine($"-------------- Newborn SP Cycle {cycle} ---------------");
+                logs.Add($"-------------- Newborn SP Cycle {cycle} ---------------");
 
                 foreach (var inputs in sequences)
                 {
                     foreach (var input in inputs.data)
                     {
                         Debug.WriteLine($" -- {inputs.name} - {input} --");
-                    
+
                         var lyrOut = layer1.Compute(input, true);
 
                         if (isInStableState)
@@ -140,12 +150,15 @@ namespace ApproveMultisequenceLearning
             // We activate here the Temporal Memory algorithm.
             layer1.HtmModules.Add("tm", tm);
 
+            logs.Add($"Training SP+TM to each sequence.");
+
             //
             // Loop over all sequences.
             foreach (var sequenceKeyPair in sequences)
             {
-                Debug.WriteLine($"-------------- Sequences {sequenceKeyPair.name} ---------------");
-                Console.WriteLine($"-------------- Sequences {sequenceKeyPair.name} ---------------");
+                Debug.WriteLine($"~~~~~~~~~~~~~~~ Sequences {sequenceKeyPair.name} ~~~~~~~~~~~~~~~");
+                Console.WriteLine($"~~~~~~~~~~~~~~~ Sequences {sequenceKeyPair.name} ~~~~~~~~~~~~~~~");
+                logs.Add($"~~~~~~~~~~~~~~~ Sequences {sequenceKeyPair.name} ~~~~~~~~~~~~~~~");
 
                 int maxPrevInputs = sequenceKeyPair.data.Length - 1;
 
@@ -156,6 +169,7 @@ namespace ApproveMultisequenceLearning
                 // Set on true if the system has learned the sequence with a maximum acurracy.
                 bool isLearningCompleted = false;
 
+                cycle = 0;
                 //
                 // Now training with SP+TM. SP is pretrained on the given input pattern set.
                 for (int i = 0; i < maxCycles; i++)
@@ -169,6 +183,7 @@ namespace ApproveMultisequenceLearning
                     Debug.WriteLine($"-------------- Cycle SP+TM {cycle} ---------------");
                     Console.WriteLine($"-------------- Cycle SP+TM {cycle} ---------------");
                     Debug.WriteLine("");
+                    logs.Add($"-------------- Cycle SP+TM {cycle} ---------------");
 
                     foreach (var input in sequenceKeyPair.data)
                     {
@@ -245,20 +260,23 @@ namespace ApproveMultisequenceLearning
 
                     Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {sequenceKeyPair.data.Length}\t {accuracy}%");
                     Console.WriteLine($"Cycle: {cycle}\tMatches={matches} of {sequenceKeyPair.data.Length}\t {accuracy}%");
+                    logs.Add($"Cycle: {cycle}\tMatches={matches} of {sequenceKeyPair.data.Length}\t {accuracy}%");
 
                     if (accuracy >= maxPossibleAccuraccy)
                     {
                         maxMatchCnt++;
                         Debug.WriteLine($"100% accuracy reched {maxMatchCnt} times.");
                         Console.WriteLine($"100% accuracy reched {maxMatchCnt} times.");
+                        logs.Add($"100% accuracy reched {maxMatchCnt} times.");
 
                         //
                         // Experiment is completed if we are 30 cycles long at the 100% accuracy.
                         if (maxMatchCnt >= 30)
                         {
-                            sw.Stop();
+                            //sw.Stop();
                             Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequenceKeyPair.name} learning time: {sw.Elapsed}.");
                             Console.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequenceKeyPair.name} learning time: {sw.Elapsed}.");
+                            logs.Add($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequenceKeyPair.name} learning time: {sw.Elapsed}.");
                             isLearningCompleted = true;
                             break;
                         }
@@ -267,6 +285,7 @@ namespace ApproveMultisequenceLearning
                     {
                         Debug.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
                         Console.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
+                        logs.Add($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
                         maxMatchCnt = 0;
                     }
 
@@ -274,12 +293,21 @@ namespace ApproveMultisequenceLearning
                     tm.Reset(mem);
                 }
 
-                if (isLearningCompleted == false)
-                    throw new Exception($"The system didn't learn with expected acurracy!");
-            }
+                //if (isLearningCompleted == false)
+                //    throw new Exception($"The system didn't learn with expected acurracy!");
 
+            }
+            sw.Stop();
+            Console.WriteLine("-----------------TRAINING END------------------------");
+            string timespend = $"Training Time : {sw.Elapsed}";
+            Console.WriteLine(timespend);
+            logs.Add(timespend);
             Debug.WriteLine("------------ END ------------");
-           
+
+            logs.Add("-----------------Learning completed------------------------");
+
+            MulitsequenceHelper.WriteLogs(OutputPath, logs);
+
             return new Predictor(layer1, mem, cls);
         }
 

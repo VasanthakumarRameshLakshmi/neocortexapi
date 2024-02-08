@@ -117,5 +117,40 @@ namespace ApproveMultisequenceLearning
 
             return datasetPath;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public static string GetLogFile()
+        {
+            string BasePath = AppDomain.CurrentDomain.BaseDirectory;
+            string reportFolder = Path.Combine(BasePath, "report");
+            if (!Directory.Exists(reportFolder))
+                Directory.CreateDirectory(reportFolder);
+            
+            var ticks = DateTime.Now.Ticks;
+            string reportPath = Path.Combine(reportFolder, $"dataset_{ticks}.txt");
+
+            if (!File.Exists(reportPath))
+            {
+                using (StreamWriter sw = File.CreateText(reportPath))
+                {
+                    sw.WriteLine($"Log file created at {ticks}...");
+                }
+            }
+
+            return reportPath;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="logs"></param>
+        public static void WriteLogs(string filePath, List<string> logs)
+        {
+            File.AppendAllLines(filePath, logs);
+        }
     }
 }
