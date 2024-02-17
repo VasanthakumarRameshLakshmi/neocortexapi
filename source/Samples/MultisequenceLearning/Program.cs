@@ -99,7 +99,7 @@ namespace ApproveMultisequenceLearning
         {
             var dataset = DatasetHelper.CreateDataset(config.count, config.size, config.startVal, config.endVal);
 
-            var datasetPath = MulitsequenceHelper.SaveDataset(dataset);
+            var datasetPath = MulitsequenceHelper.SaveDataset(dataset, "dataset");
 
             return datasetPath;
         }
@@ -114,7 +114,7 @@ namespace ApproveMultisequenceLearning
 
             var testdataset = TestDatasetHelper.CreateTestDataset(config.count, config.size - 3, config.testSize, config.startVal, config.endVal, sequences);
 
-            var testDatasetPath = MulitsequenceHelper.SaveDataset(testdataset);
+            var testDatasetPath = MulitsequenceHelper.SaveDataset(testdataset, "dataset_test");
 
             return testDatasetPath;
         }

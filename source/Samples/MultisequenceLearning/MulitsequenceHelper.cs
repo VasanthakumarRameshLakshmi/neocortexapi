@@ -94,7 +94,7 @@ namespace ApproveMultisequenceLearning
         /// </summary>
         /// <param name="sequences">Object of list of Sequence</param>
         /// <returns>Full path of the dataset</returns>
-        public static string SaveDataset(List<Sequence> sequences)
+        public static string SaveDataset(List<Sequence> sequences, string filename)
         {
             if (sequences == null)
                 return null;
@@ -103,7 +103,7 @@ namespace ApproveMultisequenceLearning
             string datasetFolder = Path.Combine(BasePath, "dataset");
             if (!Directory.Exists(datasetFolder))
                 Directory.CreateDirectory(datasetFolder);
-            string datasetPath = Path.Combine(datasetFolder, $"dataset_{DateTime.Now.Ticks}.json");
+            string datasetPath = Path.Combine(datasetFolder, $"{filename}_{DateTime.Now.Ticks}.json");
 
             Console.WriteLine("Saving dataset...");
 
@@ -130,7 +130,7 @@ namespace ApproveMultisequenceLearning
                 Directory.CreateDirectory(reportFolder);
             
             var ticks = DateTime.Now.Ticks;
-            string reportPath = Path.Combine(reportFolder, $"dataset_{ticks}.txt");
+            string reportPath = Path.Combine(reportFolder, $"reports_{ticks}.txt");
 
             if (!File.Exists(reportPath))
             {
