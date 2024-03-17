@@ -20,7 +20,8 @@ namespace ApproveMultisequenceLearning
         public int startVal { get; set; }
         public int endVal { get; set; }
 
-        public ConfigOfSequence(int Count, int Size, int TestSize, int StartVal, int EndVal)
+        public ConfigOfSequence(int Count, int Size, 
+            int TestSize, int StartVal, int EndVal)
         {
             this.count = Count;
             this.size = Size + 3;
