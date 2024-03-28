@@ -29,13 +29,16 @@ namespace MultisequenceLearning
 
             for(int i = 0; i < numberOfSequence; i++)
             {
+                // select random sequence
                 Sequence sequence = SelectRandomSequence(sequences);
+                // create sub-sequence
                 Sequence testSequence = CreateTestSequence(testSize, size, sequence, $"T{i+1}");
                 testSequences.Add(testSequence);
             }
 
             return testSequences;
         }
+        
         /// <summary>
         /// Generates a customizable test dataset for sequence-based evaluation
         /// </summary>
@@ -50,6 +53,7 @@ namespace MultisequenceLearning
             
             return selectSequence;
         }
+        
         /// <summary>
         /// Creates a new subsequence from the test sequence
         /// </summary>
@@ -66,6 +70,7 @@ namespace MultisequenceLearning
             int selectIndexNo = random.Next(0, size-testSize-1); // is that the array index doesnot go out of bound later
             int[] value = new int[testSize];
 
+            // copy sub-sequence in temp array
             for (int i = testSize, j = 0; i > 0; i--, j++)
             {
                 value[j] = sequence.data[selectIndexNo+j];
@@ -74,6 +79,7 @@ namespace MultisequenceLearning
 
             return newSubSequence;
         }
+       
         /// <summary>
         /// Checks if the parameters for creating dataset is valid or not
         /// </summary>

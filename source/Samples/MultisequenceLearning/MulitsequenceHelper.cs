@@ -119,9 +119,9 @@ namespace ApproveMultisequenceLearning
         }
 
         /// <summary>
-        /// 
+        /// Create a unique file name for writing logs
         /// </summary>
-        /// <returns></returns>
+        /// <returns>returns name of log file</returns>
         public static string GetLogFile()
         {
             string BasePath = AppDomain.CurrentDomain.BaseDirectory;
@@ -144,10 +144,10 @@ namespace ApproveMultisequenceLearning
         }
 
         /// <summary>
-        /// 
+        /// Write logs in the given file name with full path
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="logs"></param>
+        /// <param name="filePath">full path of log</param>
+        /// <param name="logs">logs to be written</param>
         public static void WriteLogs(string filePath, List<string> logs)
         {
             File.AppendAllLines(filePath, logs);

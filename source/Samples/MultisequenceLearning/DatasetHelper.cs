@@ -60,9 +60,11 @@ namespace ApproveMultisequenceLearning
         /// <returns>return a list of sequence</returns>
         public static List<Sequence> CreateDataset(int numberOfSequence, int size, int startVal, int endVal)
         {
+            // validate config before creating dataset
             if (!IsCreateDatasetValid(numberOfSequence, size, startVal, endVal))
                 return null;
             Console.WriteLine("Creating Sequence...");
+            // create the sequence
             List<Sequence> sequence = CreateSequences(numberOfSequence, size, startVal, endVal);
 
             return sequence;
@@ -70,7 +72,7 @@ namespace ApproveMultisequenceLearning
         }
 
         /// <summary>
-        /// Creats multiple sequences as per parameters
+        /// Creates multiple sequences as per parameters
         /// </summary>
         /// <param name="count">Number of sequences to be created</param>
         /// <param name="size">Size of each sequence</param>
@@ -81,6 +83,7 @@ namespace ApproveMultisequenceLearning
         {
             List<Sequence> dataset = new List<Sequence>();
 
+            // loop thru the count as number of sequences tobe created
             for (int i = 0; i < count; i++)
             {
                 Sequence sequence = new Sequence();
@@ -103,6 +106,7 @@ namespace ApproveMultisequenceLearning
         {
             int[] data = new int[size];
 
+            // create the sorted random sequence and randomly remove 3 ele,emts from sequences
             data = randomRemoveInt(randomInt(size, startVal, stopVal), 3);
 
             return data;
@@ -121,6 +125,8 @@ namespace ApproveMultisequenceLearning
             List<int> list = new List<int>();
             int number = 0;
             Random r = new Random(Guid.NewGuid().GetHashCode());
+
+            // create random sequence
             while (list.Count < size)
             {
                 number = r.Next(startVal, stopVal);
@@ -131,6 +137,7 @@ namespace ApproveMultisequenceLearning
                 }
             }
 
+            // sort the sequence
             array = list.ToArray();
             Array.Sort(array);
 
@@ -150,6 +157,7 @@ namespace ApproveMultisequenceLearning
             int number = 0;
             List<int> list = new List<int>();
 
+            // randomly remove elements
             while (list.Count < (array.Length - less))
             {
                 number = array[random.Next(0, (array.Length))];
@@ -157,6 +165,7 @@ namespace ApproveMultisequenceLearning
                     list.Add(number);
             }
 
+            // sort the sequence
             temp = list.ToArray();
             Array.Sort(temp);
 
@@ -170,11 +179,13 @@ namespace ApproveMultisequenceLearning
         /// <param name="startVal">Min range of the list (inclusive)</param>
         /// <param name="stopVal">Max range of the list (exclusive)</param>
         /// <returns>Sorted array of unique random integers</returns>
-        private static int[] RandomSortedIntegers(int size, int startVal, int stopVal)
+        [Obsolete]
+        private static int[] randomSortedIntegers(int size, int startVal, int stopVal)
         {
             if (size <= 0 || stopVal <= startVal)
                 throw new ArgumentException("Invalid size or range.");
 
+            // calc the range of sequence
             int range = stopVal - startVal;
 
             if (size > range)

@@ -67,6 +67,10 @@ namespace ApproveMultisequenceLearning
             MulitsequenceHelper.WriteLogs(logFile, logs);
         }
      
+        /// <summary>
+        /// Creates and saves dataset and test dataset as per config
+        /// </summary>
+        /// <returns>list of dataset full path</returns>
         private static List<string> CreateSaveData()
         {
             var datasetPath = new List<string>();
@@ -79,17 +83,20 @@ namespace ApproveMultisequenceLearning
 
             max = endVal;
 
+            // creating config for dataset
             ConfigOfSequence configOfSequence = new ConfigOfSequence(numberOfSequence, size, 0, startVal, endVal);
 
             var dataset = CreateDataset(configOfSequence);
             datasetPath.Add(dataset);
 
+            // creating config for test dataset
             ConfigOfSequence configOfTestSequence = new ConfigOfSequence(numberOfTestSequence, size, testSize, startVal, endVal);
 
             var testDataset = CreateTestDataset(configOfTestSequence, MulitsequenceHelper.ReadDataset(dataset));
             datasetPath.Add(testDataset);
             return datasetPath;
         }
+
         /// <summary>
         /// Generates a dataset based on the provided configuration
         /// </summary>
@@ -103,6 +110,7 @@ namespace ApproveMultisequenceLearning
 
             return datasetPath;
         }
+
         /// <summary>
         /// Creates a test dataset based on the provided configuration and existing sequences
         /// </summary>
@@ -118,8 +126,9 @@ namespace ApproveMultisequenceLearning
 
             return testDatasetPath;
         }
+
         /// <summary>
-        /// Predicts the next element in the sequence using the provided predictor and input list
+        /// Predicts the next element in the sequence using the provided predictor and input list and calculates accuracy
         /// </summary>
         /// <param name="predictor">predictor used for making predictions</param>
         /// <param name="list">input list for prediction</param>
@@ -133,14 +142,20 @@ namespace ApproveMultisequenceLearning
 
             Debug.WriteLine("------------------------------");
 
+            // loop through all the items in the list
             foreach (var item in list)
             {
+                
+                /*
+                 * for the first item do not predict 
+                 */
                 if(first)
                 {
                     first = false;
                 }
                 else 
                 {
+                    // predict the next element of previously saved element
                     Console.WriteLine($"Input: {prev}");
                     var res = predictor.Predict(prev);
 
@@ -155,22 +170,26 @@ namespace ApproveMultisequenceLearning
                         var tokens2 = res.First().PredictedInput.Split('-');
                         Debug.WriteLine($"Predicted Sequence: {tokens[0]}, predicted next element {tokens2.Last()}");
 
+                        // compare the predicted element with actual next element in sequence
                         if (item == Int32.Parse(tokens2.Last()))
                         {
+                            // increment the count since matched
                             matchCount++;
                         }
 
+                        // increment the count since predict function was called and prediction took place
                         predictions++;
                     }
                     else
                         Debug.WriteLine("Nothing predicted :(");
                 }
 
+                // save the element as previous to compare with next element predicted
                 prev = item;
             }
 
             /*
-             * Calculate the ACCURACY here!!!!!!
+             * ACCURACY calculated here!!!!!!
              * 
              * Accuracy is calculated as number of matching predictions made 
              * divided by total number of prediction made for an element in subsequence
@@ -183,6 +202,11 @@ namespace ApproveMultisequenceLearning
             return accuracy;
         }
 
+        /// <summary>
+        /// Wrappper to read the dateset with full path to dataset
+        /// </summary>
+        /// <param name="datasetPath">full path to dataset</param>
+        /// <returns>list of sequences</returns>
         private static List<Sequence> ReadDataset(string datasetPath)
         {
             List<Sequence> dataset = MulitsequenceHelper.ReadDataset(datasetPath);
