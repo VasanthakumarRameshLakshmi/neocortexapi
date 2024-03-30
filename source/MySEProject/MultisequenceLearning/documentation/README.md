@@ -6,16 +6,19 @@ This experiment to understand how multisequence learning algorithm learns sequen
 
 ## Implementation
 
-![image]()
+![image](../documentation/images/overview.png)
 
 Fig: Overview of the project
 
 `Sequence` is our main data model of the sequences which are learned by the multisequence learning algorithm.
 
 ```csharp
+// Model of sequence
 public class Sequence
 {
+    // name of sequence
     public String name { get; set; }
+    // sequence itself
     public int[] data { get; set; }
 }
 ```
@@ -62,6 +65,36 @@ eg:
     "data": [ 17, 18, 19, 20, 21 ]
   }
 ]
+```
+
+`ConfigOfSequence` is another data model used as configuration for creating the data in `Sequence`. 
+
+```csharp
+// Model of configuration used to create sequence
+public class ConfigOfSequence
+{
+    // count of the sequence
+    public int count { get; set; }
+    // length/size of each sequence
+    public int size { get; set; }
+    // length/size of each test sequence
+    public int testSize { get; set; }
+    // start value of sequence
+    public int startVal { get; set; }
+    // end value of sequence
+    public int endVal { get; set; }
+
+    // constructor
+    public ConfigOfSequence(int Count, int Size, 
+        int TestSize, int StartVal, int EndVal)
+    {
+        this.count = Count;
+        this.size = Size + 3;
+        this.testSize = TestSize;
+        this.startVal = StartVal;
+        this.endVal = EndVal;
+    }
+}
 ```
 
 Our project is mainly divided into 3 helper methods:
@@ -410,6 +443,8 @@ private static Sequence SelectRandomSequence(List<Sequence> sequences)
 
 - CreateTestSequence() is used to create a new subsequence from the test sequence.
 
+![fig](../documentation/images/venns_diagram.jpg)
+
 ```csharp
 /// <summary>
 /// Creates a new subsequence from the test sequence
@@ -515,6 +550,8 @@ private static List<string> CreateSaveData()
 ```
 
 - PredictNextElement() is a function that predicts the next element and 
+
+![fig](../documentation/images/accuracy.png)
 
 ```csharp
 /// <summary>
